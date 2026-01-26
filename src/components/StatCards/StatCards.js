@@ -1,6 +1,4 @@
-```javascript
 import React, { useEffect, useState } from 'react';
-
 import CONFIG from '../../config';
 
 const StatCards = () => {
@@ -12,7 +10,7 @@ const StatCards = () => {
 
   useEffect(() => {
     // Fetch user library to calculate stats
-    fetch(`${ CONFIG.API_BASE_URL } /api/library ? user_id = 1`)
+    fetch(`${CONFIG.API_BASE_URL}/api/library?user_id=1`)
       .then(res => res.json())
       .then(data => {
         const uniqueAuthors = new Set(data.map(b => b.author)).size;
@@ -47,11 +45,11 @@ const StatCards = () => {
         </div>
       ))}
       <style>{`
-  .stat - card { transition: all 0.3s ease; }
-        .stat - card:hover { transform: translateY(-5px); box - shadow: 0 10px 25px rgba(0, 0, 0, 0.1); }
-        .fade -in { animation: fadeIn 0.5s ease-in; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-`}</style>
+        .stat-card { transition: all 0.3s ease; }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+      `}</style>
     </div>
   );
 };

@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import CONFIG from '../config';
 
 const Products = ({ setView, setSelectedBook }) => {
   const [books, setBooks] = React.useState([]);

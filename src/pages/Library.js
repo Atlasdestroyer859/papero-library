@@ -6,8 +6,9 @@ const Library = ({ setView, setSelectedBook }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Hardcoded User ID 1 for demo
-        fetch(`${CONFIG.API_BASE_URL}/api/library?user_id=1`)
+        const user = JSON.parse(localStorage.getItem('papero_user')) || { id: 1 };
+
+        fetch(`${CONFIG.API_BASE_URL}/api/library?user_id=${user.id}`)
             .then(res => res.json())
             .then(data => {
                 setBooks(data);

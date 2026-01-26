@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import CONFIG from '../config';
 
-const Profile = ({ onLogout }) => {
+const Profile = ({ onLogout, setView }) => {
     const [user, setUser] = useState(JSON.parse(localStorage.getItem('papero_user')));
     const [stats, setStats] = useState({ streak_days: 0, books_read: 0, pages_read: 0 });
 

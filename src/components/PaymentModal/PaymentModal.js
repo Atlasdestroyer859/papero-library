@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import CONFIG from '../../config';
 
 const PaymentModal = ({ isOpen, onClose, total, cartItems, onSuccess }) => {
     const [step, setStep] = useState('method'); // method, verify, processing, success
@@ -20,13 +21,15 @@ const PaymentModal = ({ isOpen, onClose, total, cartItems, onSuccess }) => {
         // 2. Real Backend Call
         try {
             let allSuccess = true;
+            const user = JSON.parse(localStorage.getItem('papero_user')) || { id: 1 };
+
             for (const item of cartItems) {
-                console.log("Purchasing book:", item.id);
+                console.log("Purchasing book for user:", user.id);
                 const res = await fetch(`${CONFIG.API_BASE_URL}/api/purchase`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        user_id: 1,
+                        user_id: user.id,
                         book_id: item.id,
                         book_data: {
                             title: item.title,

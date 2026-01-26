@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import CONFIG from '../config';
 
 const genres = [
     { id: 'sci-fi', label: '🚀 Sci-Fi', color: '#1a237e' },
@@ -69,7 +70,7 @@ const Onboarding = ({ user, onFinish }) => {
 
                 <button
                     disabled={selected.length < 3}
-                    onClick={handleFinish}
+                    onClick={finishOnboarding}
                     style={{
                         ...styles.btn,
                         opacity: selected.length < 3 ? 0.3 : 1

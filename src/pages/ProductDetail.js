@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import CONFIG from '../config';
 
 const ProductDetail = ({ book, onBack, addToCart }) => {
   const [liked, setLiked] = useState(false);

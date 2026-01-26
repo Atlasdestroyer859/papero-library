@@ -49,18 +49,13 @@ const Reader = ({ book, onBack }) => {
             </div>
 
             <div style={styles.readerFrame}>
-                {embedUrl ? (
-                    <iframe
-                        src={embedUrl}
-                        width="100%"
-                        height="100%"
-                        frameBorder="0"
-                        allowFullScreen
-                        title="reader"
-                    ></iframe>
-                ) : (
+                {loading ? (
                     <div style={styles.loading}>
                         <p>Loading Book Experience...</p>
+                    </div>
+                ) : (
+                    <div style={{ padding: '40px', fontSize: '18px', lineHeight: '1.6', overflowY: 'auto', height: '100%', whiteSpace: 'pre-wrap' }}>
+                        {content}
                     </div>
                 )}
             </div>
