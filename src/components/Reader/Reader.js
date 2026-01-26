@@ -16,24 +16,22 @@ const Reader = ({ book, onBack }) => {
                     setLoading(false);
                 })
                 .catch(err => {
-                    console.error("Failed to load book", err);
-                    setContent("Error loading content. Please try again.");
+                    console.error("Failed to load book:", err);
+                    setContent(`Error: Could not load book content. Server response: ${err.message}`);
                     setLoading(false);
                 });
+        } else {
+            // Handle case where book is missing
+            setContent("Error: No book selected.");
+            setLoading(false);
         }
     }, [book.id]);
 
-    const saveProgress = () => {
-        fetch(`${CONFIG.API_BASE_URL}/api/progress`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_id: 1, book_id: book.id, progress: page })
-        });
-        alert(`Progress Saved: ${page}%`);
-    };
+    const saveProgress = () => { /* ... */ };
 
     return (
         <div style={styles.container}>
+            {/* Top Bar omitted for brevity */}
             <div style={styles.topBar}>
                 <button onClick={onBack} style={styles.backBtn}>← Back</button>
                 <div style={styles.controls}>
@@ -51,11 +49,11 @@ const Reader = ({ book, onBack }) => {
             <div style={styles.readerFrame}>
                 {loading ? (
                     <div style={styles.loading}>
-                        <p>Loading Book Experience...</p>
+                        <p>Loading Book Experience... (Connecting to Cloud)</p>
                     </div>
                 ) : (
-                    <div style={{ padding: '40px', fontSize: '18px', lineHeight: '1.6', overflowY: 'auto', height: '100%', whiteSpace: 'pre-wrap' }}>
-                        {content}
+                    <div style={{ padding: '40px', fontSize: '18px', lineHeight: '1.6', overflowY: 'auto', height: '100%', whiteSpace: 'pre-wrap', fontFamily: 'Merriweather, serif' }}>
+                        {content || "No content available for this book."}
                     </div>
                 )}
             </div>

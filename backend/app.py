@@ -1,11 +1,12 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
+import sqlite3
 import requests
+import random
+import os
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
-import sqlite3
-import os
 from werkzeug.security import generate_password_hash, check_password_hash
 from database import get_db_connection, init_db
 
