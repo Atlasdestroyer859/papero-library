@@ -1,29 +1,35 @@
+```javascript
 import React, { useState, useEffect } from 'react';
 import CONFIG from '../../config';
 
 const Reader = ({ book, onBack }) => {
-    const [content, setContent] = useState('');
+    const [embedUrl, setEmbedUrl] = useState('');
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
     const [page, setPage] = useState(book.progress || 0);
 
     useEffect(() => {
         if (book && book.id) {
             setLoading(true);
-            fetch(`${CONFIG.API_BASE_URL}/api/read/${book.id}`)
+            setError('');
+            fetch(`${ CONFIG.API_BASE_URL } /api/read / ${ book.id } `)
                 .then(res => res.json())
                 .then(data => {
-                    setContent(data.content);
+                    if(data.url) {
+                        setEmbedUrl(data.url);
+                    } else {
+                        setError("Book content format not supported.");
+                    }
                     setLoading(false);
                 })
                 .catch(err => {
                     console.error("Failed to load book:", err);
-                    setContent(`Error: Could not load book content. Server response: ${err.message}`);
+                    setError(`Error: Could not load book.${ err.message } `);
                     setLoading(false);
                 });
         } else {
-            // Handle case where book is missing
-            setContent("Error: No book selected.");
-            setLoading(false);
+             setError("Error: No book selected.");
+             setLoading(false);
         }
     }, [book.id]);
 
@@ -47,14 +53,27 @@ const Reader = ({ book, onBack }) => {
             </div>
 
             <div style={styles.readerFrame}>
-                {loading ? (
+                {loading && (
                     <div style={styles.loading}>
-                        <p>Loading Book Experience... (Connecting to Cloud)</p>
+                        <p>Loading Internet Archive Reader...</p>
                     </div>
-                ) : (
-                    <div style={{ padding: '40px', fontSize: '18px', lineHeight: '1.6', overflowY: 'auto', height: '100%', whiteSpace: 'pre-wrap', fontFamily: 'Merriweather, serif' }}>
-                        {content || "No content available for this book."}
+                )}
+                
+                {error && !loading && (
+                    <div style={styles.loading}>
+                        <p style={{color: 'red'}}>{error}</p>
                     </div>
+                )}
+
+                {!loading && !error && embedUrl && (
+                    <iframe 
+                        src={embedUrl}
+                        width="100%"
+                        height="100%"
+                        frameBorder="0"
+                        allowFullScreen
+                        title="Book Reader"
+                    ></iframe>
                 )}
             </div>
         </div>

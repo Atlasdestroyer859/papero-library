@@ -601,42 +601,16 @@ def read_book(book_id):
         return jsonify({"error": "Book not found"}), 404
 
     ia_id = book['ia_id']
-    content = ""
+    
+    if not ia_id:
+        return jsonify({"error": "Book not available in public archive"}), 404
 
-    if ia_id:
-        try:
-            # Try to fetch full text from Internet Archive
-            # Common format: https://archive.org/download/<id>/<id>_djvu.txt
-            text_url = f"https://archive.org/download/{ia_id}/{ia_id}_djvu.txt"
-            response = requests.get(text_url, timeout=5)
-            
-            if response.status_code == 200:
-                content = response.text[:50000] # Limit size for performance
-            else:
-                content = f"Full text not available from Archive.org (Status: {response.status_code})."
-        except Exception as e:
-            print(f"Content Fetch Error: {e}")
-            content = "Could not retrieve content from the cloud."
-
-    # Fallback Content
-    if not content or len(content) < 200:
-         content = f"""
-{book['title']}
-by {book['author']}
-
-[Preview Mode - Full Text Unavailable]
-
-Chapter 1
-
-The sun projected through the open window, illuminating the dust motes dancing in the shaft of light. 
-It was the start of a journey that would change everything. The library was silent, save for the soft rustle of pages turning.
-
-"Knowledge," the old librarian had said, "is not just about reading. It is about understanding."
-
-(This is a generated sample because the original book text could not be downloaded automatically from the Internet Archive.)
-         """
-
-    return jsonify({"title": book['title'], "content": content})
+    # Return the Embed URL for the Iframe (BookReader)
+    return jsonify({
+        "title": book['title'],
+        "type": "iframe",
+        "url": f"https://archive.org/embed/{ia_id}?ui=embed&wrapper=false"
+    })
 
 if __name__ == '__main__':
     app.run(debug=True)
