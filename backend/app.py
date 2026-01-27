@@ -176,10 +176,11 @@ def get_library():
     conn = get_db_connection()
     # Join books and purchases
     query = '''
-        SELECT b.*, p.purchase_date, p.progress, p.user_id 
+        SELECT b.*, p.purchase_date, p.progress, p.last_read_at, p.user_id 
         FROM books b
         JOIN purchases p ON b.id = p.book_id
         WHERE p.user_id = ?
+        ORDER BY p.last_read_at DESC, p.purchase_date DESC
     '''
     library = conn.execute(query, (user_id,)).fetchall()
     conn.close()
@@ -616,6 +617,26 @@ def read_book(book_id):
     
     if not ia_id:
         return jsonify({"error": "Book not available in public archive"}), 404
+
+    # UPDATE LAST READ TIMESTAMP
+    # We need user_id to update the correct purchase record.
+    # ideally we should use session/token, but strict user instruction says dynamic user ID.
+    # The frontend usually doesn't send user_id in this GET request easily without modifying query params.
+    # Wait, the original plan says "Automatically update last_read_at = NOW() when called".
+    # BUT, we need to know WHO is reading.
+    # Let's modify the GET request to accept user_id? 
+    # Or, we can do it in a separate POST call or adding ?user_id=X to this GET.
+    # Let's add user_id param support.
+    
+    user_id = request.args.get('user_id')
+    if user_id:
+        try:
+            conn.execute('UPDATE purchases SET last_read_at = CURRENT_TIMESTAMP WHERE user_id = ? AND book_id = ?', (user_id, book_id))
+            conn.commit()
+        except Exception as e:
+            print(f"Failed to update timestamp: {e}")
+
+    conn.close()
 
     # Return the Embed URL for the Iframe (BookReader)
     return jsonify({

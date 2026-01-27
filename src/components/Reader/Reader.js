@@ -11,8 +11,13 @@ const Reader = ({ book, onBack }) => {
         if (book && book.id) {
             setLoading(true);
             setError('');
-            // Corrected string interpolation without extra spaces
-            fetch(`${CONFIG.API_BASE_URL}/api/read/${book.id}`)
+
+            // Fetch User ID
+            const user = JSON.parse(localStorage.getItem('papero_user'));
+            const userId = user ? user.id : 1;
+
+            // Pass user_id to trigger "Last Read" update
+            fetch(`${CONFIG.API_BASE_URL}/api/read/${book.id}?user_id=${userId}`)
                 .then(res => res.json())
                 .then(data => {
                     if (data.url) {
@@ -33,21 +38,12 @@ const Reader = ({ book, onBack }) => {
         }
     }, [book.id]);
 
-    const saveProgress = () => { /* ... */ };
-
     return (
         <div style={styles.container}>
             <div style={styles.topBar}>
-                <button onClick={onBack} style={styles.backBtn}>← Back</button>
-                <div style={styles.controls}>
-                    <span style={{ marginRight: '10px', color: '#666' }}>My Progress:</span>
-                    <input
-                        type="range" min="0" max="100" value={page}
-                        onChange={(e) => setPage(e.target.value)}
-                        style={{ cursor: 'pointer' }}
-                    />
-                    <span style={{ width: '40px', textAlign: 'center' }}>{page}%</span>
-                    <button onClick={saveProgress} style={styles.saveBtn}>Save Spot</button>
+                <button onClick={onBack} style={styles.backBtn}>← Back to Library</button>
+                <div style={styles.info}>
+                    <span style={{ color: '#888', fontSize: '14px' }}>Reading: <b>{book.title}</b></span>
                 </div>
             </div>
 

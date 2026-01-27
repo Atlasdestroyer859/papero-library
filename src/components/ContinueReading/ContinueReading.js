@@ -11,11 +11,10 @@ const ContinueReading = ({ setView, setSelectedBook }) => {
     fetch(`${CONFIG.API_BASE_URL}/api/library?user_id=${userId}`)
       .then(res => res.json())
       .then(data => {
-        // Find book with highest progress, or just the last purchased one
+        // Since backend sorts by last_read_at DESC, the first item is the most recent
         if (data.length > 0) {
-          const latest = data[data.length - 1];
-          // Simple simulation: If progress is 0, show 5% to encourage reading
-          setBook({ ...latest, progress: latest.progress || 5 });
+          const latest = data[0];
+          setBook(latest);
         }
       })
       .catch(err => console.error(err));
@@ -35,10 +34,7 @@ const ContinueReading = ({ setView, setSelectedBook }) => {
       <div style={styles.info}>
         <h4 style={styles.title}>{book.title}</h4>
         <p style={styles.author}>{book.author}</p>
-        <div style={styles.progressContainer}>
-          <div style={{ ...styles.bar, width: `${book.progress}%` }}></div>
-        </div>
-        <p style={styles.pct}>{book.progress}% Complete</p>
+        <p style={{ fontSize: '12px', color: '#2ecc71', marginTop: '5px' }}>Recently Read</p>
       </div>
       <button
         onClick={() => {

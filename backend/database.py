@@ -56,6 +56,7 @@ def init_db():
             book_id INTEGER,
             purchase_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             progress INTEGER DEFAULT 0,
+            last_read_at TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users (id),
             FOREIGN KEY (book_id) REFERENCES books (id),
             UNIQUE(user_id, book_id)
