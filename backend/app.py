@@ -17,6 +17,15 @@ CORS(app)
 # Initialize DB on startup
 init_db()
 
+# Auto-Seed Check
+conn = get_db_connection()
+book_count = conn.execute("SELECT COUNT(*) FROM books").fetchone()[0]
+conn.close()
+
+if book_count == 0:
+    print("🌱 Database is empty. Auto-seeding...")
+    seed_database()
+
 @app.route('/health', methods=['GET'])
 def health_check():
     return jsonify({"status": "healthy", "service": "AI eBook Backend"})

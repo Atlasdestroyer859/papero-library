@@ -102,6 +102,14 @@ def init_db():
         )
     ''')
     
+    # --- MIGRATION LOGIC (Self-Healing) ---
+    try:
+        # Check if 'last_read_at' exists in purchases
+        c.execute("SELECT last_read_at FROM purchases LIMIT 1")
+    except sqlite3.OperationalError:
+        print("🔧 Migrating DB: Adding 'last_read_at' to purchases...")
+        c.execute("ALTER TABLE purchases ADD COLUMN last_read_at TIMESTAMP")
+        
     conn.commit()
     conn.close()
     print(f"Database {DB_NAME} initialized successfully with Phase 6 Schema.")
