@@ -10,7 +10,10 @@ const StatCards = () => {
 
   useEffect(() => {
     // Fetch user library to calculate stats
-    fetch(`${CONFIG.API_BASE_URL}/api/library?user_id=1`)
+    const user = JSON.parse(localStorage.getItem('papero_user'));
+    const userId = user ? user.id : 1;
+
+    fetch(`${CONFIG.API_BASE_URL}/api/library?user_id=${userId}`)
       .then(res => res.json())
       .then(data => {
         const uniqueAuthors = new Set(data.map(b => b.author)).size;

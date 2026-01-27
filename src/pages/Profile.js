@@ -40,7 +40,7 @@ const Profile = ({ onLogout, setView }) => {
                         <div style={styles.statLabel}>Day Streak</div>
                     </div>
                     <div style={styles.statBox}>
-                        <div style={styles.statValue}>📖 {stats?.booksRead || 0}</div>
+                        <div style={styles.statValue}>📖 {stats?.books_read || 0}</div>
                         <div style={styles.statLabel}>Books Read</div>
                     </div>
                 </div>

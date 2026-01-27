@@ -483,6 +483,28 @@ def get_or_create_book(raw_book_id, book_data=None):
     conn.close()
     return None
 
+@app.route('/api/user_stats/<int:user_id>', methods=['GET'])
+def get_user_stats(user_id):
+    conn = get_db_connection()
+    
+    # 1. Calc Books Read (Progress > 90% or just count purchased for now)
+    # Since we removed manual progress, let's just count all purchases as "Library"
+    # And maybe interactions for "Read"? No, let's just count library size for now.
+    books_count = conn.execute('SELECT COUNT(*) FROM purchases WHERE user_id = ?', (user_id,)).fetchone()[0]
+    
+    # 2. Calc Streak (Naive implementation based on last_read_at)
+    # Ideally checking consecutive days. For now, let's return profile streak.
+    profile = conn.execute('SELECT streak_days FROM user_profiles WHERE user_id = ?', (user_id,)).fetchone()
+    streak = profile['streak_days'] if profile else 0
+    
+    conn.close()
+    
+    return jsonify({
+        "streak": streak,
+        "books_read": books_count, # simple metric
+        "pages_read": books_count * 320 # approx
+    })
+
 @app.route('/api/search_external', methods=['GET'])
 def search_external():
     """Proxies search to OpenLibrary for 'Infinite' content."""
