@@ -58,7 +58,7 @@ const Products = ({ setView, setSelectedBook }) => {
 
   const loadLocalBooks = () => {
     setLoading(true);
-    fetch('http://localhost:5000/api/books')
+    fetch(`${CONFIG.API_BASE_URL}/api/books`)
       .then(res => res.json())
       .then(data => {
         setBooks(data);
@@ -89,7 +89,7 @@ const Products = ({ setView, setSelectedBook }) => {
 
     if (isGlobal && val.length > 2) {
       setLoading(true);
-      fetch(`http://localhost:5000/api/search_external?q=${val}`)
+      fetch(`${CONFIG.API_BASE_URL}/api/search_external?q=${val}`)
         .then(res => res.json())
         .then(data => {
           setBooks(data);
@@ -98,6 +98,7 @@ const Products = ({ setView, setSelectedBook }) => {
         .catch(err => setLoading(false));
     }
   };
+
 
   const loadMoreGlobal = () => {
     // Naive Load More implementation for Demo

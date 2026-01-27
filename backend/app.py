@@ -9,6 +9,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
 from werkzeug.security import generate_password_hash, check_password_hash
 from database import get_db_connection, init_db
+from ingest_archive import seed_database
 
 app = Flask(__name__)
 CORS(app)
@@ -19,6 +20,17 @@ init_db()
 @app.route('/health', methods=['GET'])
 def health_check():
     return jsonify({"status": "healthy", "service": "AI eBook Backend"})
+
+# Temp Route to Seed DB on Render
+@app.route('/api/seed_db', methods=['POST'])
+def seed_db_route():
+    try:
+        # Check for simple auth key if needed, skipping for now as per user instruction context
+        print("SEEDING DATABASE...")
+        seed_database()
+        return jsonify({"success": True, "message": "Database seeded successfully"})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
 
 # --- AUTHENTICATION API ---
 

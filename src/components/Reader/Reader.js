@@ -1,4 +1,3 @@
-```javascript
 import React, { useState, useEffect } from 'react';
 import CONFIG from '../../config';
 
@@ -12,10 +11,11 @@ const Reader = ({ book, onBack }) => {
         if (book && book.id) {
             setLoading(true);
             setError('');
-            fetch(`${ CONFIG.API_BASE_URL } /api/read / ${ book.id } `)
+            // Corrected string interpolation without extra spaces
+            fetch(`${CONFIG.API_BASE_URL}/api/read/${book.id}`)
                 .then(res => res.json())
                 .then(data => {
-                    if(data.url) {
+                    if (data.url) {
                         setEmbedUrl(data.url);
                     } else {
                         setError("Book content format not supported.");
@@ -24,12 +24,12 @@ const Reader = ({ book, onBack }) => {
                 })
                 .catch(err => {
                     console.error("Failed to load book:", err);
-                    setError(`Error: Could not load book.${ err.message } `);
+                    setError(`Error: Could not load book. ${err.message}`);
                     setLoading(false);
                 });
         } else {
-             setError("Error: No book selected.");
-             setLoading(false);
+            setError("Error: No book selected.");
+            setLoading(false);
         }
     }, [book.id]);
 
@@ -37,7 +37,6 @@ const Reader = ({ book, onBack }) => {
 
     return (
         <div style={styles.container}>
-            {/* Top Bar omitted for brevity */}
             <div style={styles.topBar}>
                 <button onClick={onBack} style={styles.backBtn}>← Back</button>
                 <div style={styles.controls}>
@@ -58,15 +57,15 @@ const Reader = ({ book, onBack }) => {
                         <p>Loading Internet Archive Reader...</p>
                     </div>
                 )}
-                
+
                 {error && !loading && (
                     <div style={styles.loading}>
-                        <p style={{color: 'red'}}>{error}</p>
+                        <p style={{ color: 'red' }}>{error}</p>
                     </div>
                 )}
 
                 {!loading && !error && embedUrl && (
-                    <iframe 
+                    <iframe
                         src={embedUrl}
                         width="100%"
                         height="100%"

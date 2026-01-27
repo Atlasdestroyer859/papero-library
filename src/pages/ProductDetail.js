@@ -53,7 +53,7 @@ const ProductDetail = ({ book, onBack, addToCart }) => {
 
     setLiked(!liked); // Optimistic UI
     try {
-      await fetch('http://localhost:5000/api/interact', {
+      await fetch(`${CONFIG.API_BASE_URL}/api/interact`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: user.id, book_id: currentBook.id, action: 'like' })
@@ -73,7 +73,7 @@ const ProductDetail = ({ book, onBack, addToCart }) => {
     setNewComment('');
 
     try {
-      await fetch('http://localhost:5000/api/comments', {
+      await fetch(`${CONFIG.API_BASE_URL}/api/comments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

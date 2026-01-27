@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from 'react';
+import CONFIG from '../../config';
 
 const ContinueReading = ({ setView, setSelectedBook }) => {
   const [book, setBook] = useState(null);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/library?user_id=1')
+    const user = JSON.parse(localStorage.getItem('papero_user'));
+    const userId = user ? user.id : 1;
+
+    fetch(`${CONFIG.API_BASE_URL}/api/library?user_id=${userId}`)
       .then(res => res.json())
       .then(data => {
         // Find book with highest progress, or just the last purchased one
