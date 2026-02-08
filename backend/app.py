@@ -301,29 +301,42 @@ def chat_librarian():
         1. Answer the user's question naturally (briefly).
         2. If the user asks for a book recommendation, author, or specific topic, extract a search query.
         """
-        # User wanted "Exaclty as before"
-        # We switch to gemini-2.0-flash which supports JSON mode perfectly.
-        # This avoids the "Gemma" parsing logic and should have a separate quota.
-        
+        # User requested 'Gemma 3 27B' to avoid Gemini quotas
+        # gemma-3-27b-it does NOT support response_mime_type="application/json"
+        # So we remove it and parse manually.
         chat = client.chats.create(
-            model='gemini-2.0-flash',
+            model='gemma-3-27b-it',
             config=types.GenerateContentConfig(
-                system_instruction=sys_prompt,
-                response_mime_type="application/json"
+                system_instruction=sys_prompt
             )
         )
         
         response = chat.send_message(user_message)
         
         import json
+        import re
+        
         try:
+            # Try raw load
             ai_data = json.loads(response.text)
-            final_text = ai_data.get('text', "I found some books for you.")
-            search_query = ai_data.get('search_query')
         except:
-             # Fallback if JSON fails
-            final_text = response.text
-            search_query = None
+             # Try to find JSON blob
+             try:
+                 json_match = re.search(r'\{.*\}', response.text, re.DOTALL)
+                 if json_match:
+                     ai_data = json.loads(json_match.group())
+                 else:
+                     raise ValueError("No JSON found")
+             except:
+                 # Fallback: Treat as pure text
+                 ai_data = {"text": response.text, "search_query": None}
+
+        final_text = ai_data.get('text', response.text)
+        search_query = ai_data.get('search_query')
+        
+        # If text is empty/weird, use raw response
+        if not final_text:
+             final_text = response.text
 
         book_results = []
         if search_query and search_query != "null":
