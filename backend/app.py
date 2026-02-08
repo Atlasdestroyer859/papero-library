@@ -292,8 +292,8 @@ def chat_librarian():
         # user send: {role: 'user', parts: [{text: 'xs'}]}
         # We need to construct the chat history for the client.
         
-        # New SDK supports chat = client.chats.create(model='gemini-1.5-flash')
-        chat = client.chats.create(model='gemini-1.5-flash')
+        # New SDK supports chat = client.chats.create(model='gemini-2.5-flash')
+        chat = client.chats.create(model='gemini-2.5-flash')
         
         # We can add history manually or just send message if we don't care about memory for now (simpler validation)
         # To keep it robust:
