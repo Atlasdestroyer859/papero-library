@@ -300,13 +300,13 @@ def chat_librarian():
         You are The Librarian. 
         1. Answer the user's question naturally (briefly).
         2. If the user asks for a book recommendation, author, or specific topic, extract a search query.
-        3. OUTPUT JSON ONLINE: {"text": "Your reply...", "search_query": "extracted keywords or null"}
         """
+        # User wanted "Exaclty as before"
+        # We switch to gemini-2.0-flash which supports JSON mode perfectly.
+        # This avoids the "Gemma" parsing logic and should have a separate quota.
         
-        # User requested 'Gemma 3 27B' to avoid Gemini quotas
-        # gemma-3-27b-it is available in the list
         chat = client.chats.create(
-            model='gemma-3-27b-it',
+            model='gemini-2.0-flash',
             config=types.GenerateContentConfig(
                 system_instruction=sys_prompt,
                 response_mime_type="application/json"
