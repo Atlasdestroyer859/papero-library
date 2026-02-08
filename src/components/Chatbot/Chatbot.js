@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import CONFIG from '../../config';
 
-const Chatbot = () => {
+const Chatbot = (props) => {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([
         { role: 'model', text: "Hello! I'm the Librarian. I can help you find books or recommend something based on your mood. Ask me anything!" }
@@ -69,9 +69,14 @@ const Chatbot = () => {
                 <div style={styles.bookAuthor}>{book.author}</div>
                 <button
                     style={styles.readBtn}
-                    onClick={() => window.open(`http://localhost:3000?book=${book.id}`, '_self')}
+                    onClick={() => {
+                        if (props.onNavigate) {
+                            props.onNavigate('product-detail', book);
+                            setIsOpen(false); // Close chat on selection
+                        }
+                    }}
                 >
-                    READ
+                    VIEW
                 </button>
             </div>
         </div>

@@ -136,7 +136,12 @@ function App() {
         onRemove={(idx) => setCartItems(cartItems.filter((_, i) => i !== idx))}
         onClear={() => setCartItems([])}
       />
-      <Chatbot />
+      <Chatbot
+        onNavigate={(viewName, bookData) => {
+          if (bookData) setSelectedBook(bookData);
+          setView(viewName);
+        }}
+      />
     </div>
   );
 }
