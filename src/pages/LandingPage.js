@@ -80,6 +80,28 @@ const LandingPage = ({ setView }) => {
                     </div>
                 </div>
 
+                {/* Features Section (Added based on user's snippet) */}
+                <div style={styles.section}>
+                    <h2 style={styles.sectionTitle}>Key Features</h2>
+                    <div className="features-grid" style={styles.featuresGrid}>
+                        <div className="feature-card" style={styles.featureCard}>
+                            <span className="icon" style={styles.featureIcon}>🧠</span>
+                            <h3 style={styles.featureTitle}>AI Librarian</h3>
+                            <p style={styles.featureDescription}>Ask our smart assistant for personalized book recommendations anytime.</p>
+                        </div>
+                        <div className="feature-card" style={styles.featureCard}>
+                            <span className="icon" style={styles.featureIcon}>🌍</span>
+                            <h3 style={styles.featureTitle}>Global Access</h3>
+                            <p style={styles.featureDescription}>Read millions of books from the Internet Archive instantly.</p>
+                        </div>
+                        <div className="feature-card" style={styles.featureCard}>
+                            <span className="icon" style={styles.featureIcon}>🏆</span>
+                            <h3 style={styles.featureTitle}>Gamified Reading</h3>
+                            <p style={styles.featureDescription}>Earn badges, track streaks, and compete with the community.</p>
+                        </div>
+                    </div>
+                </div>
+
                 {/* FAQ Section */}
                 <div style={styles.section}>
                     <h2 style={styles.sectionTitle}>Frequently Asked Questions</h2>

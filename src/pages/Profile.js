@@ -3,69 +3,63 @@ import CONFIG from '../config';
 
 const Profile = ({ onLogout, setView }) => {
     const [user, setUser] = useState(JSON.parse(localStorage.getItem('papero_user')));
-    const [stats, setStats] = useState({ streak_days: 0, books_read: 0, pages_read: 0 });
-
-    useEffect(() => {
-        if (user) {
-            fetch(`${CONFIG.API_BASE_URL}/api/user_stats/${user.id}`)
-                .then(res => res.json())
-                .then(data => setStats(data))
-                .catch(err => console.error("Failed to fetch stats", err));
-        }
-    }, [user]);
 
     if (!user) return <div style={styles.container}>Please log in.</div>;
 
     return (
         <div style={styles.container}>
-            <h1 style={styles.header}>My Library Card</h1>
+            <div style={styles.content}>
+                <h1 style={styles.header}>My Account</h1>
 
-            <div style={styles.card}>
-                <div style={styles.profileHeader}>
-                    <img
-                        src={`https://ui-avatars.com/api/?name=${user.name}&background=FF6B6B&color=fff&size=128`}
-                        alt="Profile"
-                        style={styles.avatar}
-                    />
-                    <div>
-                        <h2 style={styles.name}>{user.name}</h2>
-                        <p style={styles.email}>{user.email}</p>
-                        <span style={styles.badge}>📚 Avid Reader</span>
-                    </div>
-                </div>
-
-                <div style={styles.statsGrid}>
-                    <div style={styles.statBox}>
-                        <div style={styles.statValue}>🔥 {stats?.streak || 0}</div>
-                        <div style={styles.statLabel}>Day Streak</div>
-                    </div>
-                    <div style={styles.statBox}>
-                        <div style={styles.statValue}>📖 {stats?.books_read || 0}</div>
-                        <div style={styles.statLabel}>Books Read</div>
-                    </div>
-                </div>
-
-                <div style={styles.section}>
-                    <h3>Integrations</h3>
-                    <div style={styles.integrationBox}>
-                        <div>
-                            <h4 style={{ margin: 0 }}>🏛️ Internet Archive</h4>
-                            <p style={{ margin: '5px 0', fontSize: '12px', color: '#666' }}>Connect to borrow copyright books directly.</p>
+                {/* Digital Library Card */}
+                <div style={styles.card}>
+                    <div style={styles.cardHeader}>
+                        <div style={styles.chip}>
+                            <img src="https://img.icons8.com/ios-filled/50/ffffff/sim-card-chip.png" alt="chip" width="40" />
                         </div>
-                        <button
-                            onClick={() => window.open('https://archive.org/account/login', '_blank')}
-                            style={styles.connectBtn}
-                        >
-                            Connect Account
-                        </button>
+                        <div style={styles.logo}>PAPERO</div>
+                    </div>
+
+                    <div style={styles.cardBody}>
+                        <img
+                            src={`https://ui-avatars.com/api/?name=${user.name}&background=fff&color=333&size=128&bold=true`}
+                            alt="Profile"
+                            style={styles.avatar}
+                        />
+                        <div style={styles.userDetails}>
+                            <h2 style={styles.name}>{user.name}</h2>
+                            <p style={styles.email}>{user.email}</p>
+                            <p style={styles.memberId}>ID: {String(user.id).padStart(8, '0')}</p>
+                        </div>
+                    </div>
+
+                    <div style={styles.cardFooter}>
+                        <div style={styles.status}>ACTIVE MEMBER</div>
+                        <div style={styles.expiry}>VALID THRU 12/30</div>
                     </div>
                 </div>
 
-                <div style={styles.section}>
-                    <h3>Settings</h3>
-                    <button onClick={() => setView('onboarding')} style={styles.actionBtn}>
-                        Restart Onboarding (Pick Genres)
-                    </button>
+                {/* Quick Actions */}
+                <div style={styles.actionsGrid}>
+                    <div style={styles.actionCard} onClick={() => setView('library')}>
+                        <span style={{ fontSize: '24px' }}>📚</span>
+                        <span>My Library</span>
+                    </div>
+
+                    <div style={styles.actionCard} onClick={() => setView('onboarding')}>
+                        <span style={{ fontSize: '24px' }}>🎨</span>
+                        <span>Edit Tastes</span>
+                    </div>
+
+                    <div style={styles.actionCard} onClick={() => window.open('https://archive.org/account/login', '_blank')}>
+                        <span style={{ fontSize: '24px' }}>🏛️</span>
+                        <span>Link Archive.org</span>
+                    </div>
+
+                    <div style={{ ...styles.actionCard, color: 'red' }} onClick={onLogout}>
+                        <span style={{ fontSize: '24px' }}>🚪</span>
+                        <span>Sign Out</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -73,22 +67,61 @@ const Profile = ({ onLogout, setView }) => {
 };
 
 const styles = {
-    container: { padding: '20px', animation: 'fadeIn 0.5s ease' },
-    header: { marginBottom: '30px', color: '#333' },
-    card: { background: 'white', borderRadius: '20px', padding: '40px', maxWidth: '600px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' },
-    profileHeader: { display: 'flex', alignItems: 'center', gap: '30px', marginBottom: '40px' },
-    avatar: { borderRadius: '50%', width: '100px', height: '100px' },
-    name: { margin: 0, fontSize: '24px', color: '#2c3e50' },
-    email: { color: '#7f8c8d', margin: '5px 0' },
-    badge: { display: 'inline-block', background: '#e1f5fe', color: '#039be5', padding: '5px 10px', borderRadius: '15px', fontSize: '12px', fontWeight: 'bold', marginTop: '10px' },
-    statsGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '40px' },
-    statBox: { background: '#f8f9fa', padding: '20px', borderRadius: '15px', textAlign: 'center' },
-    statValue: { fontSize: '24px', fontWeight: 'bold', color: '#2c3e50' },
-    statLabel: { color: '#95a5a6', fontSize: '14px' },
-    section: { borderTop: '1px solid #eee', paddingTop: '20px', marginTop: '20px' },
-    integrationBox: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f0f0f0', padding: '15px', borderRadius: '10px', marginBottom: '20px' },
-    connectBtn: { padding: '8px 15px', background: '#333', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '12px' },
-    actionBtn: { padding: '10px 20px', background: '#eee', color: '#333', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold' }
+    container: {
+        padding: '40px 20px',
+        animation: 'fadeIn 0.5s ease',
+        display: 'flex',
+        justifyContent: 'center'
+    },
+    content: { width: '100%', maxWidth: '500px' },
+    header: { marginBottom: '30px', color: '#333', textAlign: 'center', fontSize: '24px' },
+
+    // Library Card Styles
+    card: {
+        background: 'linear-gradient(135deg, #1a1a1a 0%, #333 100%)',
+        borderRadius: '20px',
+        padding: '30px',
+        color: 'white',
+        boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
+        marginBottom: '40px',
+        position: 'relative',
+        overflow: 'hidden'
+    },
+    cardHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' },
+    logo: { fontWeight: '900', letterSpacing: '2px', opacity: 0.8 },
+    chip: { opacity: 0.8 },
+
+    cardBody: { display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '30px' },
+    avatar: {
+        borderRadius: '50%',
+        width: '80px',
+        height: '80px',
+        border: '3px solid rgba(255,255,255,0.2)'
+    },
+    userDetails: { flex: 1 },
+    name: { margin: 0, fontSize: '20px', letterSpacing: '0.5px' },
+    email: { margin: '5px 0', fontSize: '12px', opacity: 0.6 },
+    memberId: { fontSize: '12px', fontFamily: 'monospace', opacity: 0.4, marginTop: '5px' },
+
+    cardFooter: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '10px', fontWeight: 'bold', opacity: 0.6, letterSpacing: '1px' },
+
+    // Actions
+    actionsGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' },
+    actionCard: {
+        background: 'white',
+        borderRadius: '15px',
+        padding: '20px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '10px',
+        boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
+        cursor: 'pointer',
+        fontSize: '14px',
+        fontWeight: 'bold',
+        color: '#555',
+        transition: 'transform 0.2s'
+    }
 };
 
 export default Profile;

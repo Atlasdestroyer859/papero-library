@@ -260,6 +260,118 @@ def purchase_book():
     
     return jsonify({"success": success})
 
+# --- 7. READING & AI ---
+
+# --- AI CHATBOT (Gemini) ---
+import google.generativeai as genai
+import os
+
+# Configure Gemini
+# In production, use os.environ.get('GEMINI_API_KEY')
+GEMINI_API_KEY = "AIzaSyB8574Zu48sBoLM0kLyEJ0zPJXM9MdJY0c" 
+genai.configure(api_key=GEMINI_API_KEY)
+
+# Tool Definition for Gemini
+tools = [
+    {
+        "function_declarations": [
+            {
+                "name": "search_books",
+                "description": "Search for books in the library catalog by query (genre, author, title).",
+                "parameters": {
+                    "type": "OBJECT",
+                    "properties": {
+                        "query": {
+                            "type": "STRING",
+                            "description": "The search term, e.g., 'horror', 'Harry Potter', 'history of rome'"
+                        }
+                    },
+                    "required": ["query"]
+                }
+            }
+        ]
+    }
+]
+
+model = genai.GenerativeModel('gemini-pro', tools=tools)
+
+@app.route('/api/chat', methods=['POST'])
+def chat_librarian():
+    data = request.json
+    user_message = data.get('message', '')
+    history = data.get('history', []) # List of {role: 'user'/'model', parts: ['text']}
+
+    if not user_message:
+        return jsonify({"error": "No message provided"}), 400
+
+    try:
+        # 1. Start Chat Session with history
+        chat = model.start_chat(history=history)
+        
+        # 2. Send User Message
+        response = chat.send_message(user_message)
+        
+        # 3. Check for Function Calls (Tool Use)
+        function_call = response.candidates[0].content.parts[0].function_call
+        
+        book_results = []
+        final_text = response.text # Default text response
+
+        if function_call:
+            # AI wants to search!
+            fn_name = function_call.name
+            fn_args = function_call.args
+            
+            if fn_name == 'search_books':
+                query = fn_args['query']
+                print(f"🤖 AI Searching for: {query}")
+                
+                # Perform the search (using existing logic)
+                # We reuse the specific_search logic but return raw data
+                results = search_external_logic(query) # Helper function needed
+                book_results = results[:3] # Limit to 3 cards for chat
+                
+                # Send search results BACK to AI to generate a summary
+                # (Or just return the cards directly to frontend)
+                # For speed, we'll just return the cards + a generic "Here is what I found."
+                final_text = f"I found some excellent books about '{query}' for you."
+
+        return jsonify({
+            "text": final_text,
+            "books": book_results
+        })
+
+    except Exception as e:
+        print(f"Chat Error: {e}")
+        # Check for specific quota error
+        if "429" in str(e):
+             return jsonify({"text": "I'm a bit overwhelmed right now (Quota Exceeded). Please try again in a minute!"}), 429
+        
+        return jsonify({"text": "I'm having trouble connecting to the archives. Please ensure the API Key is valid and try again."}), 500
+
+def search_external_logic(query):
+    """Refactored logic from /api/external_search to be usable by Python"""
+    url = f"https://openlibrary.org/search.json?q={query}&limit=10"
+    resp = requests.get(url)
+    data = resp.json()
+    
+    books = []
+    for item in data.get('docs', []):
+        if 'cover_i' in item and 'title' in item:
+             # Generate Price
+            title_hash = sum(ord(c) for c in item['title'])
+            price = 299 + (title_hash % 700)
+            
+            books.append({
+                "id": f"ol_{item['edition_key'][0] if 'edition_key' in item else item['cover_i']}",
+                "title": item['title'],
+                "author": item.get('author_name', ['Unknown'])[0],
+                "cover_url": f"https://covers.openlibrary.org/b/id/{item['cover_i']}-M.jpg",
+                "price": price,
+                "rating": round(item.get('ratings_average', 4.0), 1)
+            })
+    return books
+
 # --- ONBOARDING API ---
 @app.route('/api/onboarding', methods=['POST'])
 def save_onboarding():

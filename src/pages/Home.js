@@ -22,7 +22,12 @@ const Home = ({ setView, setSelectedBook }) => {
     fetch(`${CONFIG.API_BASE_URL}/api/global_feed?user_id=${userId}`)
       .then(res => res.json())
       .then(data => {
-        setRecommendations(data);
+        // Ensure data is an object, not empty string or error
+        if (data && typeof data === 'object') {
+          setRecommendations(data);
+        } else {
+          console.warn("Invalid recommendations data:", data);
+        }
         setLoadingRecs(false);
       })
       .catch(err => {

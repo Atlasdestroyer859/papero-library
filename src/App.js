@@ -14,6 +14,7 @@ import Profile from './pages/Profile';
 import Onboarding from './pages/Onboarding';
 
 import LandingPage from './pages/LandingPage';
+import Chatbot from './components/Chatbot/Chatbot';
 
 function App() {
   // Default to landing page
@@ -135,6 +136,7 @@ function App() {
         onRemove={(idx) => setCartItems(cartItems.filter((_, i) => i !== idx))}
         onClear={() => setCartItems([])}
       />
+      <Chatbot />
     </div>
   );
 }
