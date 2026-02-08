@@ -303,8 +303,10 @@ def chat_librarian():
         3. OUTPUT JSON ONLINE: {"text": "Your reply...", "search_query": "extracted keywords or null"}
         """
         
+        # User requested 'Gemma 3 27B' to avoid Gemini quotas
+        # gemma-3-27b-it is available in the list
         chat = client.chats.create(
-            model='gemini-2.5-flash',
+            model='gemma-3-27b-it',
             config=types.GenerateContentConfig(
                 system_instruction=sys_prompt,
                 response_mime_type="application/json"
