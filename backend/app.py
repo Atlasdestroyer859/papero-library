@@ -292,25 +292,41 @@ def chat_librarian():
         # user send: {role: 'user', parts: [{text: 'xs'}]}
         # We need to construct the chat history for the client.
         
-        # New SDK supports chat = client.chats.create(model='gemini-2.5-flash')
-        chat = client.chats.create(model='gemini-2.5-flash')
+        # Advanced Logic: Ask Gemini to be a "Librarian JSON Machine"
+        # We ask it to return a JSON object with "text" and "search_query"
+        # This is more robust than keyword matching.
         
-        # We can add history manually or just send message if we don't care about memory for now (simpler validation)
-        # To keep it robust:
+        sys_prompt = """
+        You are The Librarian. 
+        1. Answer the user's question naturally (briefly).
+        2. If the user asks for a book recommendation, author, or specific topic, extract a search query.
+        3. OUTPUT JSON ONLINE: {"text": "Your reply...", "search_query": "extracted keywords or null"}
+        """
+        
+        chat = client.chats.create(
+            model='gemini-2.5-flash',
+            config=types.GenerateContentConfig(
+                system_instruction=sys_prompt,
+                response_mime_type="application/json"
+            )
+        )
         
         response = chat.send_message(user_message)
-        final_text = response.text
-        book_results = []
         
-        # Quick Keyword Search Logic (Manual Tool Use for Stability)
-        # If the response implies a search, or if we just want to search based on keywords in user message
-        lower_msg = user_message.lower()
-        if "recommend" in lower_msg or "books about" in lower_msg or "find" in lower_msg or "looking for" in lower_msg:
-             # Extract keyword naive approach
-             keywords = user_message.replace("recommend", "").replace("books about", "").replace("find", "").strip()
-             if len(keywords) > 3:
-                 print(f"🤖 Auto-Search for: {keywords}")
-                 book_results = search_external_logic(keywords)[:3]
+        import json
+        try:
+            ai_data = json.loads(response.text)
+            final_text = ai_data.get('text', "I found some books for you.")
+            search_query = ai_data.get('search_query')
+        except:
+             # Fallback if JSON fails
+            final_text = response.text
+            search_query = None
+
+        book_results = []
+        if search_query and search_query != "null":
+             print(f"🤖 Smart-Search for: {search_query}")
+             book_results = search_external_logic(search_query)[:3]
                  
         return jsonify({
             "text": final_text,

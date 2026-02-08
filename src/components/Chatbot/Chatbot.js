@@ -18,44 +18,36 @@ const Chatbot = () => {
         }
     }, [messages, isOpen]);
 
-    const handleSend = async () => {
-        if (!input.trim()) return;
+    const handleSend = async (textOverride = null) => {
+        const msgText = typeof textOverride === 'string' ? textOverride : input;
+        if (!msgText.trim()) return;
 
-        const userMsg = { role: 'user', text: input };
-        setMessages(prev => [...prev, userMsg]);
+        // Add User Message
+        const newMessages = [...messages, { role: 'user', text: msgText }];
+        setMessages(newMessages);
         setInput('');
         setLoading(true);
 
         try {
-            // Prepare history for API (convert to Gemini format if needed, here just sending last few)
-            // Ideally, backend handles full history, but we can send a simplified version
-            const history = messages.map(m => ({
-                role: m.role === 'model' ? 'model' : 'user',
+            const history = newMessages.map(m => ({
+                role: m.role,
                 parts: [{ text: m.text }]
             }));
 
             const res = await fetch(`${CONFIG.API_BASE_URL}/api/chat`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    message: userMsg.text,
-                    history: history
-                })
+                body: JSON.stringify({ message: msgText, history })
             });
             const data = await res.json();
 
-            if (data.books && data.books.length > 0) {
-                // Response with books
+            if (data.text) {
                 setMessages(prev => [...prev, {
                     role: 'model',
                     text: data.text,
                     books: data.books
                 }]);
-            } else {
-                // Text only
-                setMessages(prev => [...prev, { role: 'model', text: data.text }]);
             }
-
         } catch (error) {
             console.error("Chat Error:", error);
             setMessages(prev => [...prev, { role: 'model', text: "I'm having trouble connecting to the archives. Please try again later." }]);
@@ -144,6 +136,15 @@ const Chatbot = () => {
                 <div ref={messagesEndRef} />
             </div>
 
+            {/* Suggested Prompts */}
+            <div style={styles.suggestions}>
+                {['Surprise Me 🎲', 'Sci-Fi 🚀', 'Horror 👻', 'History 📜', 'Best Sellers 🏆'].map((text) => (
+                    <button key={text} onClick={() => handleSend(text)} style={styles.chip}>
+                        {text}
+                    </button>
+                ))}
+            </div>
+
             <div style={styles.inputArea}>
                 <input
                     style={styles.input}
@@ -196,6 +197,18 @@ const styles = {
     inputArea: {
         padding: '16px', borderTop: '1px solid #f0f0f0',
         display: 'flex', gap: '10px', background: 'white'
+    },
+    suggestions: {
+        display: 'flex', gap: '8px', padding: '10px 16px',
+        overflowX: 'auto', background: '#f8f9fa',
+        borderTop: '1px solid #eee', whiteSpace: 'nowrap',
+        '::-webkit-scrollbar': { display: 'none' } // Hide scrollbar
+    },
+    chip: {
+        padding: '6px 12px', background: 'white', border: '1px solid #e0e0e0',
+        borderRadius: '16px', fontSize: '12px', cursor: 'pointer',
+        color: '#333', transition: 'all 0.2s',
+        boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
     },
     input: {
         flex: 1, padding: '12px 16px', borderRadius: '24px', border: '1px solid #e0e0e0',
