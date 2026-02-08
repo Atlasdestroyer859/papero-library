@@ -4,4 +4,6 @@ pandas
 scikit-learn
 requests
 gunicorn
-google-generativeai
+requests
+gunicorn
+google-genai
