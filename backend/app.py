@@ -302,16 +302,15 @@ def chat_librarian():
         2. If the user asks for a book recommendation, author, or specific topic, extract a search query.
         """
         # User requested 'Gemma 3 27B' to avoid Gemini quotas
-        # gemma-3-27b-it does NOT support response_mime_type="application/json"
-        # So we remove it and parse manually.
+        # gemma-3-27b-it does NOT support system_instruction or strict JSON
+        # So we prepend instructions to the message manually.
         chat = client.chats.create(
-            model='gemma-3-27b-it',
-            config=types.GenerateContentConfig(
-                system_instruction=sys_prompt
-            )
+            model='gemma-3-27b-it'
         )
         
-        response = chat.send_message(user_message)
+        # Prepend instruction to the user message
+        full_message = f"{sys_prompt}\n\nUser Question: {user_message}"
+        response = chat.send_message(full_message)
         
         import json
         import re
