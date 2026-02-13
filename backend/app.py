@@ -296,49 +296,44 @@ def chat_librarian():
         # We ask it to return a JSON object with "text" and "search_query"
         # This is more robust than keyword matching.
         
+        # User requested to switch back to Gemini 2.5
+        # Quotas should be reset now.
         sys_prompt = """
         You are The Librarian. 
         1. Answer the user's question naturally (briefly).
         2. If the user asks for a book recommendation, author, or specific topic, extract a search query.
+        3. OUTPUT JSON ONLINE: {"text": "Your reply...", "search_query": "extracted keywords or null"}
         """
-        # User requested 'Gemma 3 27B' to avoid Gemini quotas
-        # gemma-3-27b-it does NOT support system_instruction or strict JSON
-        # It also struggles with complex JSON generation in the message.
-        # SOLUTION: Use a simple text suffix marker.
         
         chat = client.chats.create(
-            model='gemma-3-27b-it'
+            model='gemini-2.5-flash',
+            config=types.GenerateContentConfig(
+                system_instruction=sys_prompt,
+                response_mime_type="application/json"
+            )
         )
         
-        # Simple Prompt strategy
-        full_message = f"""
-You are The Librarian. Answer the user naturally.
-IMPORTANT: If the user asks for a book recommendation or specific topic, you MUST end your message with this exact format:
-||SEARCH_CMD: <short search query>||
+        response = chat.send_message(user_message)
+        
+        import json
+        try:
+            ai_data = json.loads(response.text)
+            final_text = ai_data.get('text', "I found some books for you.")
+            search_query = ai_data.get('search_query')
+        except:
+             # Fallback if JSON fails
+            final_text = response.text
+            search_query = None
 
-User: {user_message}
-"""
-        response = chat.send_message(full_message)
-        
-        raw_text = response.text
-        search_query = None
-        final_text = raw_text
-        
-        # EXTRACT COMMAND
-        if "||SEARCH_CMD:" in raw_text:
-            parts = raw_text.split("||SEARCH_CMD:")
-            final_text = parts[0].strip() # The chat part
-            search_query = parts[1].strip().split("||")[0] # The query part
-            
         book_results = []
-        if search_query:
-             print(f"🤖 Gemma Smart-Search for: {search_query}")
+        if search_query and search_query != "null":
+             print(f"🤖 Smart-Search for: {search_query}")
              book_results = search_external_logic(search_query)[:3]
                  
         return jsonify({
             "text": final_text,
             "books": book_results,
-            "model_used": "gemma-3-27b-it" 
+            "model_used": "gemini-2.5-flash"
         })
 
     except Exception as e:
