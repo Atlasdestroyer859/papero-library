@@ -302,9 +302,9 @@ def chat_librarian():
             
         messages.append({"role": "user", "content": user_message})
 
-        # Using Llama 3.1 8B (Correct HF ID: meta-llama/Llama-3.1-8B-Instruct)
+        # Using Llama 3.1 8B (Cerebras Inference)
         response = client.chat.completions.create(
-            model="meta-llama/Llama-3.1-8B-Instruct", 
+            model="meta-llama/Llama-3.1-8B-Instruct:cerebras", 
             messages=messages,
             max_tokens=500,
             response_format={ "type": "json_object" }
