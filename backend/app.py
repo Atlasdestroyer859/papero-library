@@ -262,14 +262,16 @@ def purchase_book():
 
 # --- 7. READING & AI ---
 
-# --- AI CHATBOT (OpenAI) ---
+# --- AI CHATBOT (Hugging Face / Llama 3) ---
 from openai import OpenAI
 import os
 
-# Configure OpenAI
-# In production, use os.environ.get('OPENAI_API_KEY')
-OPENAI_API_KEY = "sk-proj-" + "dMuR9znX-50hqtjN8asBXAcC9qxWQkhEfzrlk-Pd_6gzOcJZQKU5sDKr5zk0xL38qqtSaRa30gT3BlbkFJ-KNEakPyQqiqrbowRgkuC_1RLP4MtqEhTfV08nfOvthzEnivCCk4hxjSaFHf89Q3wGCglEU10A" 
-client = OpenAI(api_key=OPENAI_API_KEY)
+# Configure Hugging Face
+HF_TOKEN = "hf_" + "tHdlROpGzeTJaiAXAoqDnCpchjlWuWxZzc"
+client = OpenAI(
+    base_url="https://router.huggingface.co/v1",
+    api_key=HF_TOKEN
+)
 
 @app.route('/api/chat', methods=['POST'])
 def chat_librarian():
@@ -281,7 +283,8 @@ def chat_librarian():
         return jsonify({"error": "No message provided"}), 400
 
     try:
-        # OpenAI System Prompt
+        # Llama 3 System Prompt
+        # Llama 3 is good at following instructions.
         sys_prompt = """
         You are The Librarian. 
         1. Answer the user's question naturally (briefly).
@@ -292,16 +295,19 @@ def chat_librarian():
         # Prepare Messages
         messages = [{"role": "system", "content": sys_prompt}]
         
-        # Add History (Optional - for now just current turn for simplicity/speed)
+        # Add History
         # for msg in history:
         #     role = "user" if msg['sender'] == 'user' else "assistant"
         #     messages.append({"role": role, "content": msg['text']})
             
         messages.append({"role": "user", "content": user_message})
 
+        # Using Llama 3.1 70B for high quality, or 8B for speed. 
+        # Let's try 70B first as it is closest to GPT-4o intelligence.
         response = client.chat.completions.create(
-            model="gpt-4o",
+            model="meta-llama/Meta-Llama-3.1-70B-Instruct", 
             messages=messages,
+            max_tokens=500,
             response_format={ "type": "json_object" }
         )
         
@@ -325,7 +331,7 @@ def chat_librarian():
         return jsonify({
             "text": final_text,
             "books": book_results,
-            "model_used": "gpt-4o"
+            "model_used": "llama-3.1-70b"
         })
 
     except Exception as e:
