@@ -302,10 +302,9 @@ def chat_librarian():
             
         messages.append({"role": "user", "content": user_message})
 
-        # Using Llama 3.1 70B for high quality, or 8B for speed. 
-        # Let's try 70B first as it is closest to GPT-4o intelligence.
+        # Using Llama 3.1 8B for speed and reliability on free inference
         response = client.chat.completions.create(
-            model="meta-llama/Meta-Llama-3.1-70B-Instruct", 
+            model="meta-llama/Meta-Llama-3.1-8B-Instruct", 
             messages=messages,
             max_tokens=500,
             response_format={ "type": "json_object" }
