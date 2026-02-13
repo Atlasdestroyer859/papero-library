@@ -269,7 +269,7 @@ import os
 
 # Configure Gemini
 # In production, use os.environ.get('GEMINI_API_KEY')
-GEMINI_API_KEY = "AIzaSyADtnuL5MeD9wVWHKTdbC3ZwcShT1tFjT0" 
+GEMINI_API_KEY = "AIzaSyDnzQf8epcTabitjiJfed_KKF5fG0rCBaM" 
 client = genai.Client(api_key=GEMINI_API_KEY)
 
 # Tool Definition for Gemini (New SDK Format)
