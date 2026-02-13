@@ -262,20 +262,14 @@ def purchase_book():
 
 # --- 7. READING & AI ---
 
-# --- AI CHATBOT (Gemini) ---
-from google import genai
-from google.genai import types
+# --- AI CHATBOT (OpenAI) ---
+from openai import OpenAI
 import os
 
-# Configure Gemini
-# In production, use os.environ.get('GEMINI_API_KEY')
-GEMINI_API_KEY = "AIzaSyCdqANCBmAbPIDHnsuGraR9BdL0C2rRBBM" 
-client = genai.Client(api_key=GEMINI_API_KEY)
-
-# Tool Definition for Gemini (New SDK Format)
-# actually, new SDK handles tools differently. 
-# For simplicity with the new SDK, let's keep it simple first without tools if possible, or use standard tool definition.
-# But let's try the simple text generation first to fix the connection.
+# Configure OpenAI
+# In production, use os.environ.get('OPENAI_API_KEY')
+OPENAI_API_KEY = "sk-proj-" + "dMuR9znX-50hqtjN8asBXAcC9qxWQkhEfzrlk-Pd_6gzOcJZQKU5sDKr5zk0xL38qqtSaRa30gT3BlbkFJ-KNEakPyQqiqrbowRgkuC_1RLP4MtqEhTfV08nfOvthzEnivCCk4hxjSaFHf89Q3wGCglEU10A" 
+client = OpenAI(api_key=OPENAI_API_KEY)
 
 @app.route('/api/chat', methods=['POST'])
 def chat_librarian():
@@ -287,42 +281,40 @@ def chat_librarian():
         return jsonify({"error": "No message provided"}), 400
 
     try:
-        # Convert history format if needed. 
-        # The new SDK uses 'contents' with 'role' and 'parts'.
-        # user send: {role: 'user', parts: [{text: 'xs'}]}
-        # We need to construct the chat history for the client.
-        
-        # Advanced Logic: Ask Gemini to be a "Librarian JSON Machine"
-        # We ask it to return a JSON object with "text" and "search_query"
-        # This is more robust than keyword matching.
-        
-        # User requested to switch back to Gemini 2.5
-        # Quotas should be reset now.
+        # OpenAI System Prompt
         sys_prompt = """
         You are The Librarian. 
         1. Answer the user's question naturally (briefly).
         2. If the user asks for a book recommendation, author, or specific topic, extract a search query.
-        3. OUTPUT JSON ONLINE: {"text": "Your reply...", "search_query": "extracted keywords or null"}
+        3. OUTPUT JSON: {"text": "Your reply...", "search_query": "extracted keywords or null"}
         """
         
-        chat = client.chats.create(
-            model='gemini-2.5-flash',
-            config=types.GenerateContentConfig(
-                system_instruction=sys_prompt,
-                response_mime_type="application/json"
-            )
+        # Prepare Messages
+        messages = [{"role": "system", "content": sys_prompt}]
+        
+        # Add History (Optional - for now just current turn for simplicity/speed)
+        # for msg in history:
+        #     role = "user" if msg['sender'] == 'user' else "assistant"
+        #     messages.append({"role": role, "content": msg['text']})
+            
+        messages.append({"role": "user", "content": user_message})
+
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=messages,
+            response_format={ "type": "json_object" }
         )
         
-        response = chat.send_message(user_message)
+        content = response.choices[0].message.content
         
         import json
         try:
-            ai_data = json.loads(response.text)
+            ai_data = json.loads(content)
             final_text = ai_data.get('text', "I found some books for you.")
             search_query = ai_data.get('search_query')
         except:
              # Fallback if JSON fails
-            final_text = response.text
+            final_text = content
             search_query = None
 
         book_results = []
@@ -333,7 +325,7 @@ def chat_librarian():
         return jsonify({
             "text": final_text,
             "books": book_results,
-            "model_used": "gemini-2.5-flash"
+            "model_used": "gpt-4o"
         })
 
     except Exception as e:
