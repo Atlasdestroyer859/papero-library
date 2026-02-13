@@ -306,6 +306,7 @@ def chat_librarian():
         }
         
         response = requests.post(HF_API_URL, headers=headers, json=payload)
+        print(f"hf_response_status: {response.status_code}") # DEPLOYMENT TRIGGER
         response_data = response.json()
         
         if 'error' in response_data:
