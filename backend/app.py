@@ -262,16 +262,13 @@ def purchase_book():
 
 # --- 7. READING & AI ---
 
-# --- AI CHATBOT (Hugging Face / Llama 3) ---
-from openai import OpenAI
+# --- AI CHATBOT (Hugging Face / Llama 3 via HTTP) ---
+import requests
 import os
 
 # Configure Hugging Face
 HF_TOKEN = "hf_" + "tHdlROpGzeTJaiAXAoqDnCpchjlWuWxZzc"
-client = OpenAI(
-    base_url="https://router.huggingface.co/v1",
-    api_key=HF_TOKEN
-)
+HF_API_URL = "https://router.huggingface.co/v1/chat/completions"
 
 @app.route('/api/chat', methods=['POST'])
 def chat_librarian():
@@ -284,7 +281,6 @@ def chat_librarian():
 
     try:
         # Llama 3 System Prompt
-        # Llama 3 is good at following instructions.
         sys_prompt = """
         You are The Librarian. 
         1. Answer the user's question naturally (briefly).
@@ -294,23 +290,29 @@ def chat_librarian():
         
         # Prepare Messages
         messages = [{"role": "system", "content": sys_prompt}]
-        
-        # Add History
-        # for msg in history:
-        #     role = "user" if msg['sender'] == 'user' else "assistant"
-        #     messages.append({"role": role, "content": msg['text']})
-            
         messages.append({"role": "user", "content": user_message})
 
-        # Using Llama 3.1 8B (Cerebras Inference)
-        response = client.chat.completions.create(
-            model="meta-llama/Llama-3.1-8B-Instruct:cerebras", 
-            messages=messages,
-            max_tokens=500,
-            response_format={ "type": "json_object" }
-        )
+        # Direct HTTP Request (Per User Snippet)
+        payload = {
+            "model": "meta-llama/Llama-3.1-8B-Instruct:cerebras",
+            "messages": messages,
+            "max_tokens": 500,
+            "response_format": { "type": "json_object" }
+        }
         
-        content = response.choices[0].message.content
+        headers = {
+            "Authorization": f"Bearer {HF_TOKEN}",
+            "Content-Type": "application/json"
+        }
+        
+        response = requests.post(HF_API_URL, headers=headers, json=payload)
+        response_data = response.json()
+        
+        if 'error' in response_data:
+             print(f"HF Error: {response_data}")
+             return jsonify({"text": f"AI Error: {response_data['error']['message']}"}), 500
+             
+        content = response_data['choices'][0]['message']['content']
         
         import json
         try:
@@ -330,7 +332,7 @@ def chat_librarian():
         return jsonify({
             "text": final_text,
             "books": book_results,
-            "model_used": "llama-3.1-70b"
+            "model_used": "llama-3.1-8b-cerebras"
         })
 
     except Exception as e:
